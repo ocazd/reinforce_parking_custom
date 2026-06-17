@@ -889,7 +889,7 @@ class ParkingEnv(gym.Env):
         reward -= 1.0 * distance
         reward += 2.0 * progress
         reward -= 0.3 * heading_error
-        reward -= 0.1  # time penalty
+        reward -= 0.05 # time penalty
 
         # Smoothness penalty
         action_change = float(np.linalg.norm(action - self._prev_action))

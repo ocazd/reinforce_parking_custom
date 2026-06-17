@@ -1,5 +1,5 @@
 """
-A2C Agent (Baseline 2 - Policy Gradient / Actor-Critic)
+A2C Agent (Actor-Critic)
 - Continuous action space (steering, throttle)
 - Synchronous Advantage Actor-Critic
 - Gaussian policy with learnable std
@@ -10,6 +10,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.distributions import Normal
+
+from agents.checkpoint_utils import validate_obs_dim
 
 
 # ------------------------------------------------------------------
@@ -104,6 +106,7 @@ class A2CAgent:
         n_steps:      int   = 128,    # steps to collect before each update
         device:       str   = "cpu",
     ):
+        self.obs_dim = obs_dim
         self.gamma         = gamma
         self.entropy_coef  = entropy_coef
         self.value_coef    = value_coef
@@ -223,6 +226,7 @@ class A2CAgent:
 
     def save(self, path: str):
         torch.save({
+            "obs_dim": self.obs_dim,
             "actor":     self.actor.state_dict(),
             "critic":    self.critic.state_dict(),
             "optimizer": self.optimizer.state_dict(),
@@ -231,6 +235,7 @@ class A2CAgent:
 
     def load(self, path: str):
         ckpt = torch.load(path, map_location=self.device)
+        validate_obs_dim(ckpt, self.obs_dim, "a2c")
         self.actor.load_state_dict(ckpt["actor"])
         self.critic.load_state_dict(ckpt["critic"])
         self.optimizer.load_state_dict(ckpt["optimizer"])
